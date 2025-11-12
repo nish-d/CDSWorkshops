@@ -1,0 +1,64 @@
+https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#deployment-v1-apps
+kubectl get namespace
+kubectl get ns
+kubectl get pod
+kubectl describe po/<pod-name> -n<NamespaceName>
+kubectl describe po -n<NamespaceName>
+kubectl create -f .\myns.yaml
+kubectl delete namespace myns
+kubectl create -f pod.yaml
+kubectl delete -f pods.yaml
+watch kubectlkube
+kubectl logs po/dov-bear -nmyns
+kubectl get pods -nmyns
+#host-port: pod-port
+kubectl port-forward po/dov-bear 3000:5000
+kubectl get all -nmyns
+kubectl delete pod/<podname> -n <namespace>
+kubectl get all -nmyns -owide
+kubectl port-forward deploy/dov-deploy -nmyns 5000
+kubectl scale deploy/dov-deploy --replicas=1 -nmyns
+kubectl describe secret/dov-secret -nmyns
+kubectl describe cm/dov-cm -nmyns
+#declarative version of create command. Create command is imperative
+kubectl apply -f dov-deploy.yml
+kubectl get endpointslice -nmyns
+kubectl port-forward svc/dov-svc 8080 -nmyns
+kubectl create -f cadang-deploy.yml
+
+kubectl run netshoot -ti --rm --image=nikolaka/netshoot -- /bin/bash
+# See the above container
+kubectl get po
+
+
+# Inside netshoot to debug your networks
+
+dig dov-svc.myns.svc.cluster.local
+curl dov-svc.myns.svc.cluster.local:80
+
+
+#Rollout
+
+k rollout status deploy/dov-rollout -nmyns
+k describe
+
+k rollout history deploy/dov-deploy -nmyns
+k rollout undo deploy/dov-deploy -nmyns --to-revision=1
+
+#Update image without chaning deployment file
+k set image deploy/dov-deploy -nmyns dov-bear-container=<imagename:updated version>
+
+
+kubectl get ep -ncadang-ns
+
+#Change the image of the container using cmd
+kubectl set image deploy/cadang-deploy cadang-container=chukmunnlee/cfdsa-fortune:v1 -ncadang-ns
+
+kubectl get pod -A
+kubectl get deploy,svc -A
+kubectl port-forward service/cadang-svc 8080 -ncadang-ns
+
+k exec -ti po/nginx --/bin/sh
+
+#Get the storage clusters
+k get storageclass

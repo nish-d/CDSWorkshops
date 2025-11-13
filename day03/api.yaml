@@ -33,6 +33,13 @@ spec:
       - name: api-container
         image: chukmunnlee/fake-api:v1
         imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 64m
+            memory: 64Mi
+          limits:
+            cpu: 64m
+            memory: 64Mi
         ports:
         - containerPort: 3000
 
@@ -54,4 +61,32 @@ spec:
   ports:
   - port: 3000
     targetPort: 3000
+
+
+---
+apiVersion: autoscaling/v2
+kind: 	HorizontalPodAutoscaler
+metadata:
+  name: hpa
+  namespace: api
+spec:
+  minReplicas: 1
+  maxReplicas: 6
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-deploy
+  metrics:
+    - type: Resource
+      resource:
+        name: memory # memory or cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+    - type: Resource
+      resource:
+        name: cpu # memory or cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
 

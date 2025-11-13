@@ -1,0 +1,130 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: w4
+  labels:
+    name: w4
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hds-svc
+  namespace: w4
+  labels:
+    app: hds-svc
+    name: hds-svc
+spec:
+  clusterIP: None
+  selector:
+    app: minio-node
+    name: minio-node
+  ports:
+    - name: data-port
+      port: 9001
+      targetPort: 9001 #this is the container port
+    - name: console-port
+      port: 9000
+      targetPort: 9000
+
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: node
+  namespace: w4
+  labels:
+    app: node
+    name: node
+spec:
+  replicas: 4
+  volumeClaimTemplates:
+    - metadata:
+        name: data-vol
+        namespace: w4
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: do-block-storage
+  serviceName: hds-svc
+  selector:
+    matchLabels:
+      app: minio-node
+      name: minio-node
+  template:
+    metadata:
+      labels:
+        app: minio-node
+        name: minio-node
+    spec:
+      containers:
+        - name: minio-container
+          image: minio/minio
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 200m
+              memory: 250Mi
+            limits:
+              cpu: 200m
+              memory: 250Mi
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "mc ready local || exit 1"
+          env:
+            - name: MINIO_ROOT_USER
+              value: minioadmin
+            - name: MINIO_ROOT_PASSWORD
+              value: minioadmin123
+          args:
+            - server
+            - --console-address=:9001
+            - --address=:9000
+            - http://node-{0...3}.hds-svc.w4.svc.cluster.local/data
+          ports:
+            - containerPort: 9000
+              name: data-port
+            - containerPort: 9001
+              name: console-port
+          volumeMounts:
+            - name: data-vol
+              mountPath: /data
+
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  namespace: w4
+  name: minio-hpa
+spec:
+  maxReplicas: 5
+  minReplicas: 4
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: node
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+
+
+

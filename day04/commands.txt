@@ -1,0 +1,21 @@
+kubectl top node
+kubectl top pod
+kubectl top po -A
+kubectl top po -A --sort-by=memory
+
+kubectl get deployment metrics-server -nkube-system -o yaml
+
+this is to generate load on the url, to force to scale up
+seige -c20 <url>
+
+to apply kustomization file
+
+kubectl apply -k . -oyaml --dry-run=server
+kubectl apply -k . -oyaml --dry-run=client
+
+kubectl rollout restart deploy/<dedply-nam> -n<namespace>
+
+#Adddress of a stateful pod in a headless service.
+<pod-name>.<headless-service-name>.<namespace>.svc.cluster.local
+
+image minio/miinio

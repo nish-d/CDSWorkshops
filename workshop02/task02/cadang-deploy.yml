@@ -1,0 +1,67 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cadang-ns
+  labels:
+    dept: eng
+    app: web
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cadang-deploy
+  namespace: cadang-ns
+  labels:
+    app: cadang-deploy
+    tag: v1
+spec:
+  #default = 1
+  replicas: 3
+  strategy:
+      type: RollingUpdate
+      rollingUpdate:
+          maxUnavailable : 30%
+          maxSurge: 30%
+  selector:
+    matchLabels:
+      #Labels that are in the template metadata, to identify which pod belongs to this deployment, We can add one or more label selectors
+      app: cadang
+      name: cadang-po
+  template:
+    #Everything we wrote for Pods.yml starting from metadata, the rest is understood
+    metadata:
+      labels:
+        app: cadang
+        name: cadang-po
+    spec:
+      containers:
+        - name: cadang-container
+          image: nish42d/cds_workshop-dov-bear:v1
+          #always, (Always pull new from registry, default) ifNotPresent ( Pull only if not present)
+          imagePullPolicy: IfNotPresent
+          # set environment variables required by the image:
+          ports:
+            - name: web-port
+              containerPort: 3000
+              protocol: 'TCP' #default = tcp
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: cadang-svc
+    namespace: cadang-ns
+    labels:
+        app: cadang
+spec:
+    type: ClusterIP
+    selector:
+        app: cadang
+        name: cadang-po
+    ports:
+        - port: 80
+          targetPort: 3000 #this is the container port
+

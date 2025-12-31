@@ -1,0 +1,22 @@
+FROM node:24 as ngbuilder
+
+LABEL name=nish42d/cds_workshop/dov-bear-ng:v1
+ARG APP_DIR=app
+WORKDIR ${APP_DIR}
+COPY *.json .
+COPY public public
+COPY src src
+#COPY node_modules node_modules
+RUN npm ci
+RUN npx ng build
+
+FROM caddy:2
+LABEL name=nish42d/cds_workshop/dov-bear:v1
+WORKDIR /app
+
+COPY caddy caddy
+COPY --from=ngbuilder app/dist/angular/browser caddy/html
+
+ENV CADDY_PORT=3000
+EXPOSE ${CADDY_PORT}
+ENTRYPOINT cd caddy && caddy run --config Caddyfile

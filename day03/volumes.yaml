@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+    name: nginx
+    namespace: default
+spec:
+    volumes:
+    - name: tmp-vol
+      #Never use this unless specified, because this is on the path of the node. So the node can become dirty, run out of memory etc
+      #hostPath:
+          #path: /opt/tmp
+      #This is safer, special managed area by kubernetes, that will be deleted if the pods are deleted. Used for 2 containers to talk to each other
+      emptyDir: {}
+    - name: html-vol
+        configMap:
+            name: data-vol
+    - name: secret-vol
+        secret:
+            secretName: secret-vol
+    containers:
+      image: nginx
+      ports:
+          containerPort: 80
+      volumeMounts:
+       - name: data-vol
+         mountPath: /var/data
+       - name: secret-vol
+         mountPath:  /var/data
+       - name: html-vol
+         mountPath: /use
+

@@ -1,0 +1,21 @@
+#docker pull harbor.pks.dsu.ppt.pcf.psa/concourse-stowage/cypress-git-zip-node20.18-chrome130@sha256:a861e4389c613911ecaeb33b5df886918d61fc36742b41f92377a15658d65136
+
+FROM harbor.pks.dsu.ppt.pcf.psa/concourse-stowage/cypress-git-zip-node20.18-chrome130:v1
+LABEL name=dov-bear
+ARG APP_DIR=app
+WORKDIR ${APP_DIR}
+COPY main.js .
+COPY package.json .
+COPY package-lock.json .
+COPY public public
+COPY views views
+COPY node_modules node_modules
+#RUN npm ci
+ENV APP_PORT=3000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3
+CMD curl -f http://localhost:${APP_PORT}/healthz || exit 1
+
+EXPOSE ${APP_PORT}
+ENTRYPOINT node main.js -p ${APP_PORT} -n dov-bear
+

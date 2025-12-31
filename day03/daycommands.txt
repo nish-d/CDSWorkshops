@@ -1,0 +1,32 @@
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+
+helm repo list
+#Searches in the hub
+helm search hub ingress
+
+#Searches in my own repo
+helm search repo ingres
+
+helm install <release-name> <repo-name> -n <namespace-name>
+helm install my-ingress ingress-nginx/ingress-nginx -ningress-nginx --create-namespace
+
+#Lists the packages insalled in ingress-ngix naemsapce
+helm ls -ningress-nginx
+
+#upgrade
+help repo update
+helm upgrade my-ingress ingess-nginx/ingress-nginx -ningress-nginx --create-namespace
+
+#uninstall
+helm uninstall my-ingress ingess-nginx/ingress-nginx -ningress-nginx --create-namespace
+
+#look at the packages without installing
+helm template my-ingress ingess-nginx/ingress-nginx -ningress-nginx > template.yml
+
+#Debug database
+kubectl run debug -ti --rm -nbggns --image=mysql -- /bin/sh
+
+
+
+#check that the service connects to the pod
+kubectl get svc -n bggns bggdb-svc -o wide

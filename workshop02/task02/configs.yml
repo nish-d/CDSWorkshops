@@ -1,0 +1,20 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dov-cm
+  namespace: myns
+data:
+  INSTANCE_NAME: dov-from-configmap
+  INSTANCE_HASH: fghskdfjghc23n
+
+---
+
+apiVersion: v1
+kind : Secret
+metadata:
+  name: dov-secret
+  namespace: myns
+type: Opaque
+data:
+  INSTANCE_NAME: ZG92LWZyb20tc2VjcmV0Cg==
